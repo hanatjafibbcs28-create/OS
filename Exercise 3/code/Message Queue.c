@@ -1,4 +1,3 @@
-Produce Consumer using Message Queue
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -52,10 +51,17 @@ int main() {
             printf("[Consumer] Consumed item: %d\n", message.data);
             sleep(2); // Simulate time taken to consume the item
         }
+        
+        // --- CHILD TERMINATED MESSAGE ---
+        printf("[System] Child process (Consumer, PID: %d) terminated.\n", getpid());
         exit(0);
     } 
     else {
         // ====== CONSTRUCTING THE PRODUCER (Parent Process) =======
+        
+        // --- CHILD CREATED MESSAGE ---
+        printf("[System] Child process created successfully with PID: %d\n\n", pid);
+        
         struct msg_buffer message;
         message.msg_type = 1; // Message type must be positive
 
@@ -77,6 +83,9 @@ int main() {
         // 4. Clean up and delete the message queue from the kernel
         msgctl(msqid, IPC_RMID, NULL);
         printf("Message queue destroyed. Program finished.\n");
+        
+        // --- PARENT TERMINATED MESSAGE ---
+        printf("[System] Parent process (Producer, PID: %d) terminated.\n", getpid());
     }
 
     return 0;
