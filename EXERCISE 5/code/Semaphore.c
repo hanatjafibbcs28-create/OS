@@ -43,47 +43,7 @@ void wait_sem(int sid, int sno) {
     s.sem_num = sno;
     s.sem_op = -1;
     s.sem_flg = SEM_UNDO;
-    if (semop(sid, &s, 1) == -1)#include "semaphore.h"
-int main() {
-    int sid, s, i;
-    int pc_out = 0, cp_in = 0;
-    int received_num, reply_num;
-    struct SharedBuffer *shared_mem;
-    s = shmget(SHM_KEY, sizeof(struct SharedBuffer), 0666);
-    if (s == -1) { perror("consumer shmget"); exit(1); }
-    shared_mem = (struct SharedBuffer *)shmat(s, NULL, 0);
-    if (shared_mem == (void *)-1) { perror("consumer shmat"); exit(1); }
-    sid = semget(SEM_KEY, TOTAL_SEMS, 0666);
-    if (sid == -1) { perror("consumer semget"); exit(1); }
-    printf("=== TWO-WAY CHAT: CONSUMER MODE ===\n");
-    for (i = 0; i < SIZE; i++) {
-        // 1. Wait and Read from Producer
-        printf("\n[Consumer] Awaiting Producer data...\n");
-        wait_sem(sid, PC_FULL);
-        wait_sem(sid, PC_MUTEX);
-        received_num = shared_mem->pc_data[pc_out % SIZE];
-        printf("[P -> C] Received from Producer: %d\n", received_num);
-        pc_out++;
-        signal_sem(sid, PC_MUTEX);
-        signal_sem(sid, PC_EMPTY);
-        // 2. Generate a reply message and send to Producer
-        reply_num = received_num * 2; // Auto-reply with double value
-        printf("[C -> P] Replying back with calculated value: %d\n", reply_num);
-        wait_sem(sid, CP_EMPTY);
-        wait_sem(sid, CP_MUTEX);
-        shared_mem->cp_data[cp_in % SIZE] = reply_num;
-        cp_in++;
-        signal_sem(sid, CP_MUTEX);
-        signal_sem(sid, CP_FULL);   
-        sleep(1); 
-    }
-    // Execution wrapped up: Purge System Resources from Linux Engine
-    shmdt(shared_mem);
-    shmctl(s, IPC_RMID, NULL);
-    semctl(sid, 0, IPC_RMID);
-    printf("\nTwo-Way communication ended. Shared structures cleared.\n");
-    return 0;
-}
+    if (semop(sid, &s, 1) == -1)
  {
         perror("wait_sem failed");
         exit(1);
